@@ -16,6 +16,7 @@ function extractFormData (dataArray, indentString, trimBody) {
     return '';
   }
   var snippetString = _.reduce(dataArray, (accumalator, item) => {
+    var requestBody = {};
     if (item.disabled) {
       return accumalator;
     }
@@ -60,6 +61,7 @@ function extractFormData (dataArray, indentString, trimBody) {
         ].join('\n'));
       }
       else {
+        // eslint-disable-next-line one-var
         var pathArray = item.src.split(path.sep),
           fileName = pathArray[pathArray.length - 1];
         accumalator.push([
@@ -74,6 +76,7 @@ function extractFormData (dataArray, indentString, trimBody) {
       }
     }
     else {
+      requestBody[sanitize(item.key, trimBody)] = sanitize(item.value, trimBody);
       accumalator.push(
         indentString.repeat(2) +
                 `'${sanitize(item.key, trimBody)}': '${sanitize(item.value, trimBody)}'`
@@ -81,7 +84,7 @@ function extractFormData (dataArray, indentString, trimBody) {
     }
     return accumalator;
   }, []);
-  return snippetString.join(',\n') + '\n';
+  return '{' + snippetString.join(',') + '}';
 }
 
 /**
@@ -99,13 +102,13 @@ function parseBody (requestbody, indentString, trimBody, contentType) {
         if (contentType === 'application/json') {
           try {
             let jsonBody = JSON.parse(requestbody[requestbody.mode]);
-            return `body: JSON.stringify(${JSON.stringify(jsonBody)})\n`;
+            return `JSON.stringify(${JSON.stringify(jsonBody)})\n`;
           }
           catch (error) {
-            return `body: ${JSON.stringify(requestbody[requestbody.mode])}\n`;
+            return `${JSON.stringify(requestbody[requestbody.mode])}\n`;
           }
         }
-        return `body: ${JSON.stringify(requestbody[requestbody.mode])}\n`;
+        return `${JSON.stringify(requestbody[requestbody.mode])}\n`;
       // eslint-disable-next-line no-case-declarations
       case 'graphql':
         let query = requestbody[requestbody.mode].query,
@@ -116,16 +119,15 @@ function parseBody (requestbody, indentString, trimBody, contentType) {
         catch (e) {
           graphqlVariables = {};
         }
-        return 'body: JSON.stringify({\n' +
+        return 'JSON.stringify({\n' +
           `${indentString.repeat(2)}query: '${sanitize(query, trimBody)}',\n` +
           `${indentString.repeat(2)}variables: ${JSON.stringify(graphqlVariables)}\n` +
           `${indentString}})`;
       case 'formdata':
-        return `formData: {\n${extractFormData(requestbody[requestbody.mode], indentString, trimBody)}` +
+        return `{${extractFormData(requestbody[requestbody.mode], indentString, trimBody)}` +
                         indentString + '}';
       case 'urlencoded':
-        return `JSON.parse({${extractFormData(requestbody[requestbody.mode], indentString, trimBody)})` +
-                        indentString + '}';
+        return `qs.stringify(${extractFormData(requestbody[requestbody.mode], indentString, trimBody)})`;
         /* istanbul ignore next */
       case 'file':
         // return 'formData: {\n' +

@@ -1,13 +1,13 @@
 {
-  "name": "@postman/codegen-dart",
+  "name": "@postman/codegen-nodejs-axios",
   "version": "0.0.1",
-  "description": "Converts Postman SDK Requests to dart code snippet",
+  "description": "Converts Postman SDK Requests to swift code snippet",
   "main": "index.js",
   "com_postman_plugin": {
     "type": "code_generator",
-    "lang": "dart",
-    "variant": "native",
-    "syntax_mode": "dart"
+    "lang": "nodejs",
+    "variant": "axios",
+    "syntax_mode": "javascript"
   },
   "directories": {
     "lib": "lib",
@@ -16,8 +16,7 @@
   "scripts": {
     "test": "node npm/test.js",
     "test-lint": "node npm/test-lint.js",
-    "test-newman": "node npm/test-newman.js",
-    "test-unit": "node npm/test-unit.js"
+    "test-newman": "node npm/test-newman.js"
   },
   "repository": {
     "type": "git",
@@ -25,8 +24,11 @@
   },
   "author": "Postman Labs <help@getpostman.com>",
   "license": "Apache-2.0",
-  "homepage": "https://github.com/postmanlabs/code-generators/tree/master/codegens/dart",
-  "dependencies": {},
+  "homepage": "https://github.com/postmanlabs/code-generators/tree/master/codegens/nodejs-axios",
+  "dependencies": {
+    "axios": "0.19.2",
+    "qs": "6.9.3"
+  },
   "devDependencies": {},
   "engines": {
     "node": ">=8"
